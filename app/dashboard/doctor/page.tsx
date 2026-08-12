@@ -110,7 +110,7 @@ export default function DoctorDashboard() {
             </h1>
 
             <p className="mt-2 text-sm text-slate-400 sm:text-base">
-              Here's your clinical overview for today.
+              Here&apos;s your clinical overview for today.
             </p>
           </div>
 
@@ -173,7 +173,7 @@ export default function DoctorDashboard() {
 
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-white sm:text-2xl">
-                Today's Appointments
+                Today&apos;s Appointments
               </h2>
 
               <p className="mt-2 text-sm text-slate-400 sm:text-base">

@@ -344,7 +344,7 @@ export default function AppointmentsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm text-slate-400">
-                      Today's Appointments
+                      Today&apos;s Appointments
                     </p>
 
                     <p className="mt-3 text-3xl font-bold text-white">

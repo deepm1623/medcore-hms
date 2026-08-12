@@ -9,7 +9,6 @@ import {
   FileText,
   FlaskConical,
   Search,
-  UserRound,
   X,
 } from "lucide-react";
 

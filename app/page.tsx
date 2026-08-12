@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ArrowRight, ShieldCheck, Stethoscope } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -50,9 +51,12 @@ export default function HomePage() {
                 "
               />
 
-              <img
+              <Image
                 src="/medcore-logo.png"
                 alt="MedCore HMS"
+                width={320}
+                height={144}
+                priority
                 className="
                   relative
                   h-28
