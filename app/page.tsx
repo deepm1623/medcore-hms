@@ -1,103 +1,244 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { ArrowRight, ShieldCheck, Stethoscope } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+export default function HomePage() {
+  const router = useRouter();
+
+  const handleSignIn = () => {
+    router.push("/login/doctor");
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="min-h-screen bg-slate-950 text-white">
+      {/* Main Content */}
+      <div className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-8">
+        <div className="w-full max-w-2xl text-center">
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* =========================================
+              EYEBROW
+          ========================================= */}
+          <p
+            className="
+              mb-6
+              text-xs
+              font-semibold
+              uppercase
+              tracking-[0.35em]
+              text-cyan-400
+              sm:text-sm
+              sm:tracking-[0.4em]
+            "
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Hospital Management System
+          </p>
+
+          {/* =========================================
+              LOGO
+          ========================================= */}
+          <div className="mb-6 flex justify-center">
+            <div className="relative">
+              {/* Glow behind logo */}
+              <div
+                className="
+                  absolute
+                  inset-0
+                  rounded-full
+                  bg-cyan-500/10
+                  blur-3xl
+                "
+              />
+
+              <img
+                src="/medcore-logo.png"
+                alt="MedCore HMS"
+                className="
+                  relative
+                  h-28
+                  w-auto
+                  object-contain
+                  drop-shadow-[0_0_24px_rgba(6,182,212,0.18)]
+                  sm:h-36
+                "
+              />
+            </div>
+          </div>
+
+          {/* =========================================
+              BRAND NAME
+          ========================================= */}
+          <h1
+            className="
+              text-5xl
+              font-bold
+              tracking-tight
+              text-white
+              sm:text-6xl
+              md:text-7xl
+            "
           >
-            Read our docs
-          </a>
+            MedCore
+          </h1>
+
+          {/* =========================================
+              DESCRIPTION
+          ========================================= */}
+          <p
+            className="
+              mx-auto
+              mt-5
+              max-w-xl
+              text-base
+              leading-7
+              text-slate-400
+              sm:text-lg
+              sm:leading-8
+            "
+          >
+            Unified healthcare management platform designed
+            to simplify clinical workflows and patient care.
+          </p>
+
+          {/* =========================================
+              SIGN IN BUTTON
+          ========================================= */}
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onClick={handleSignIn}
+              className="
+                group
+                flex
+                h-14
+                w-full
+                max-w-xs
+                items-center
+                justify-center
+                gap-3
+                rounded-2xl
+                bg-gradient-to-r
+                from-cyan-500
+                to-blue-600
+                px-6
+                text-base
+                font-semibold
+                text-white
+                shadow-xl
+                shadow-blue-500/20
+                transition-all
+                duration-300
+                hover:from-cyan-400
+                hover:to-blue-500
+                hover:shadow-2xl
+                hover:shadow-cyan-500/20
+                active:scale-[0.98]
+                sm:max-w-sm
+              "
+            >
+              <ShieldCheck
+                size={20}
+                strokeWidth={2}
+              />
+
+              <span>
+                Sign In to Dashboard
+              </span>
+
+              <ArrowRight
+                size={20}
+                strokeWidth={2}
+                className="
+                  transition-transform
+                  duration-300
+                  group-hover:translate-x-1
+                "
+              />
+            </button>
+          </div>
+
+          {/* =========================================
+              SECURITY INFORMATION CARD
+          ========================================= */}
+          <div
+            className="
+              mx-auto
+              mt-10
+              flex
+              w-full
+              max-w-lg
+              items-center
+              gap-4
+              rounded-2xl
+              border
+              border-white/[0.08]
+              bg-white/[0.025]
+              p-4
+              text-left
+              backdrop-blur-xl
+              sm:p-5
+            "
+          >
+            {/* Icon */}
+            <div
+              className="
+                flex
+                h-12
+                w-12
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                bg-cyan-500/10
+                text-cyan-400
+              "
+            >
+              <Stethoscope
+                size={23}
+                strokeWidth={1.8}
+              />
+            </div>
+
+            {/* Text */}
+            <div className="min-w-0">
+              <p
+                className="
+                  text-sm
+                  font-semibold
+                  text-white
+                "
+              >
+                Secure Clinical Dashboard
+              </p>
+
+              <p
+                className="
+                  mt-1
+                  text-xs
+                  leading-5
+                  text-slate-500
+                  sm:text-sm
+                "
+              >
+                Sign in using your assigned portal credentials.
+              </p>
+            </div>
+          </div>
+
+          {/* =========================================
+              FOOTER
+          ========================================= */}
+          <p
+            className="
+              mt-10
+              text-xs
+              text-slate-600
+            "
+          >
+            © 2026 MedCore HMS
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    </main>
   );
 }
