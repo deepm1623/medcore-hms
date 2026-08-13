@@ -1,4 +1,5 @@
 import { DoctorProfileProvider } from "@/lib/doctor-profile";
+import { NotificationProvider } from "@/lib/notifications";
 
 export default function DoctorLayout({
   children,
@@ -6,8 +7,10 @@ export default function DoctorLayout({
   children: React.ReactNode;
 }) {
   return (
-    <DoctorProfileProvider>
-      {children}
-    </DoctorProfileProvider>
+    <NotificationProvider>
+      <DoctorProfileProvider>
+        {children}
+      </DoctorProfileProvider>
+    </NotificationProvider>
   );
 }

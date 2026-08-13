@@ -1,0 +1,354 @@
+"use client";
+
+import {
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  X,
+  XCircle,
+} from "lucide-react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+type NotificationType = "success" | "error" | "warning" | "info";
+
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  createdAt: number;
+  read: boolean;
+}
+
+interface ShowNotificationOptions {
+  type?: NotificationType;
+  title: string;
+  message: string;
+}
+
+interface NotificationContextType {
+  notifications: AppNotification[];
+  unreadCount: number;
+  showNotification: (
+    options: ShowNotificationOptions
+  ) => void;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  removeNotification: (id: string) => void;
+  clearNotifications: () => void;
+}
+
+const NotificationContext =
+  createContext<NotificationContextType | null>(null);
+
+const STORAGE_KEY = "medcore_notifications";
+
+const DEFAULT_NOTIFICATIONS: AppNotification[] = [
+  {
+    id: "notification-1",
+    type: "info",
+    title: "New appointment scheduled",
+    message:
+      "Aarav Patel has an appointment scheduled for 09:00 AM.",
+    createdAt: Date.now() - 1000 * 60 * 8,
+    read: false,
+  },
+  {
+    id: "notification-2",
+    type: "success",
+    title: "Lab result available",
+    message:
+      "HbA1c result for Aarav Patel is ready for review.",
+    createdAt: Date.now() - 1000 * 60 * 25,
+    read: false,
+  },
+  {
+    id: "notification-3",
+    type: "warning",
+    title: "Follow-up reminder",
+    message:
+      "Ananya Shah has a follow-up scheduled for today.",
+    createdAt: Date.now() - 1000 * 60 * 45,
+    read: false,
+  },
+];
+
+export function NotificationProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [notifications, setNotifications] = useState<
+    AppNotification[]
+  >([]);
+
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+
+      if (saved) {
+        const parsed = JSON.parse(saved);
+
+        if (Array.isArray(parsed)) {
+          setNotifications(parsed);
+        } else {
+          setNotifications(DEFAULT_NOTIFICATIONS);
+        }
+      } else {
+        setNotifications(DEFAULT_NOTIFICATIONS);
+      }
+    } catch {
+      setNotifications(DEFAULT_NOTIFICATIONS);
+    }
+
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(notifications)
+      );
+    } catch {
+      // Ignore storage errors in frontend demo mode.
+    }
+  }, [notifications, hydrated]);
+
+  const showNotification = useCallback(
+    ({
+      type = "info",
+      title,
+      message,
+    }: ShowNotificationOptions) => {
+      const id = `notification-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}`;
+
+      const newNotification: AppNotification = {
+        id,
+        type,
+        title,
+        message,
+        createdAt: Date.now(),
+        read: false,
+      };
+
+      setNotifications((current) => [
+        newNotification,
+        ...current,
+      ]);
+
+      window.setTimeout(() => {
+        setNotifications((current) =>
+          current.filter(
+            (notification) => notification.id !== id
+          )
+        );
+      }, 6000);
+    },
+    []
+  );
+
+  const markAsRead = useCallback((id: string) => {
+    setNotifications((current) =>
+      current.map((notification) =>
+        notification.id === id
+          ? {
+              ...notification,
+              read: true,
+            }
+          : notification
+      )
+    );
+  }, []);
+
+  const markAllAsRead = useCallback(() => {
+    setNotifications((current) =>
+      current.map((notification) => ({
+        ...notification,
+        read: true,
+      }))
+    );
+  }, []);
+
+  const removeNotification = useCallback((id: string) => {
+    setNotifications((current) =>
+      current.filter(
+        (notification) => notification.id !== id
+      )
+    );
+  }, []);
+
+  const clearNotifications = useCallback(() => {
+    setNotifications([]);
+  }, []);
+
+  const unreadCount = notifications.filter(
+    (notification) => !notification.read
+  ).length;
+
+  return (
+    <NotificationContext.Provider
+      value={{
+        notifications,
+        unreadCount,
+        showNotification,
+        markAsRead,
+        markAllAsRead,
+        removeNotification,
+        clearNotifications,
+      }}
+    >
+      {children}
+
+      <NotificationToasts
+        notifications={notifications}
+        removeNotification={removeNotification}
+      />
+    </NotificationContext.Provider>
+  );
+}
+
+export function useNotifications() {
+  const context = useContext(NotificationContext);
+
+  if (!context) {
+    throw new Error(
+      "useNotifications must be used inside NotificationProvider"
+    );
+  }
+
+  return context;
+}
+
+function NotificationToasts({
+  notifications,
+  removeNotification,
+}: {
+  notifications: AppNotification[];
+  removeNotification: (id: string) => void;
+}) {
+  const visibleNotifications = notifications.filter(
+    (notification) =>
+      Date.now() - notification.createdAt < 6500
+  );
+
+  if (visibleNotifications.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none fixed right-4 top-4 z-[100] flex w-[calc(100vw-2rem)] max-w-sm flex-col gap-3 sm:right-6 sm:top-6">
+      {visibleNotifications
+        .slice(0, 4)
+        .map((notification) => (
+          <Toast
+            key={notification.id}
+            notification={notification}
+            onClose={() =>
+              removeNotification(notification.id)
+            }
+          />
+        ))}
+    </div>
+  );
+}
+
+function Toast({
+  notification,
+  onClose,
+}: {
+  notification: AppNotification;
+  onClose: () => void;
+}) {
+  const config = {
+    success: {
+      icon: CheckCircle2,
+      iconClass: "text-emerald-400",
+      borderClass: "border-emerald-400/20",
+    },
+    error: {
+      icon: XCircle,
+      iconClass: "text-red-400",
+      borderClass: "border-red-400/20",
+    },
+    warning: {
+      icon: AlertCircle,
+      iconClass: "text-amber-400",
+      borderClass: "border-amber-400/20",
+    },
+    info: {
+      icon: Info,
+      iconClass: "text-cyan-400",
+      borderClass: "border-cyan-400/20",
+    },
+  }[notification.type];
+
+  const Icon = config.icon;
+
+  return (
+    <div
+      className={`
+        pointer-events-auto
+        flex
+        gap-3
+        rounded-2xl
+        border
+        ${config.borderClass}
+        bg-slate-950/95
+        p-4
+        shadow-2xl
+        shadow-black/40
+        backdrop-blur-xl
+      `}
+    >
+      <Icon
+        size={21}
+        className={`mt-0.5 shrink-0 ${config.iconClass}`}
+      />
+
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-white">
+          {notification.title}
+        </p>
+
+        <p className="mt-1 text-xs leading-5 text-slate-400">
+          {notification.message}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close notification"
+        className="
+          flex
+          h-7
+          w-7
+          shrink-0
+          items-center
+          justify-center
+          rounded-lg
+          text-slate-500
+          transition
+          hover:bg-white/5
+          hover:text-white
+        "
+      >
+        <X size={16} />
+      </button>
+    </div>
+  );
+}
