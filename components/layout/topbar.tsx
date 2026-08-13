@@ -23,18 +23,21 @@ export default function Topbar({
 }: TopbarProps) {
   const router = useRouter();
 
-  const notificationRef = useRef<HTMLDivElement>(null);
+  const notificationRef =
+    useRef<HTMLDivElement>(null);
 
   const [showNotifications, setShowNotifications] =
     useState(false);
-const {
-  notifications,
-  unreadCount,
-  markAsRead,
-  markAllAsRead,
-  removeNotification,
-  clearNotifications,
-} = useNotifications();
+
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    clearNotifications,
+  } = useNotifications();
+
   /* =========================================================
      GO TO DOCTOR DASHBOARD
   ========================================================= */
@@ -91,12 +94,36 @@ const {
   }, [showNotifications]);
 
   /* =========================================================
-     OPEN SETTINGS
+     DOCTOR PROFILE / SETTINGS
   ========================================================= */
 
   const handleDoctorProfile = () => {
     setShowNotifications(false);
     router.push("/dashboard/doctor/settings");
+  };
+
+  /* =========================================================
+     NOTIFICATION TOGGLE
+  ========================================================= */
+
+  const handleNotificationToggle = () => {
+    setShowNotifications((current) => !current);
+  };
+
+  /* =========================================================
+     MARK ALL READ
+  ========================================================= */
+
+  const handleMarkAllRead = () => {
+    markAllAsRead();
+  };
+
+  /* =========================================================
+     CLEAR ALL NOTIFICATIONS
+  ========================================================= */
+
+  const handleClearNotifications = () => {
+    clearNotifications();
   };
 
   return (
@@ -140,7 +167,7 @@ const {
           "
         >
 
-          {/* Hamburger */}
+          {/* Mobile menu */}
 
           <button
             type="button"
@@ -174,9 +201,7 @@ const {
             />
           </button>
 
-          {/* =================================================
-              CLICKABLE MEDCORE BRAND
-          ================================================= */}
+          {/* Mobile MedCore brand */}
 
           <button
             type="button"
@@ -223,7 +248,6 @@ const {
 
         {/* =====================================================
             DESKTOP LEFT
-            CLICKABLE MEDCORE BRAND + SEARCH
         ====================================================== */}
 
         <div
@@ -236,7 +260,7 @@ const {
           "
         >
 
-          {/* Desktop MedCore Brand */}
+          {/* Desktop MedCore brand */}
 
           <button
             type="button"
@@ -282,6 +306,7 @@ const {
 
           <div
             className="
+              flex
               flex-1
               max-w-xl
             "
@@ -307,6 +332,7 @@ const {
               <input
                 type="search"
                 placeholder="Search patients, appointments..."
+                aria-label="Search patients and appointments"
                 className="
                   h-12
                   w-full
@@ -355,17 +381,13 @@ const {
             className="relative"
           >
 
-            {/* Notification Button */}
+            {/* Notification button */}
 
             <button
               type="button"
               aria-label="Notifications"
               aria-expanded={showNotifications}
-              onClick={() =>
-                setShowNotifications(
-                  (current) => !current
-                )
-              }
+              onClick={handleNotificationToggle}
               className="
                 relative
                 flex
@@ -388,14 +410,14 @@ const {
                 strokeWidth={1.8}
               />
 
-              {/* Unread indicator */}
+              {/* Unread count */}
 
               {unreadCount > 0 && (
                 <span
                   className="
                     absolute
-                    right-[5px]
-                    top-[4px]
+                    right-[4px]
+                    top-[3px]
                     flex
                     h-4
                     min-w-4
@@ -479,16 +501,24 @@ const {
                               ? "notification"
                               : "notifications"
                           }`
-                        : "You're all caught up"}
+                        : "You&apos;re all caught up"}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-1
+                    "
+                  >
+
+                    {/* Mark all read */}
 
                     {unreadCount > 0 && (
                       <button
                         type="button"
-                        onClick={markAllAsRead}
+                        onClick={handleMarkAllRead}
                         className="
                           rounded-lg
                           px-2
@@ -504,6 +534,8 @@ const {
                         Mark all read
                       </button>
                     )}
+
+                    {/* Close */}
 
                     <button
                       type="button"
@@ -529,15 +561,15 @@ const {
                   </div>
                 </div>
 
-                {/* Notification List */}
+                {/* Notification list */}
 
                 <div
                   className="
                     max-h-[420px]
                     overflow-y-auto
-                    custom-scrollbar
                   "
                 >
+
                   {notifications.length === 0 ? (
                     <div
                       className="
@@ -582,7 +614,7 @@ const {
                           text-slate-600
                         "
                       >
-                        You're all caught up.
+                        You&apos;re all caught up.
                       </p>
                     </div>
                   ) : (
@@ -604,7 +636,12 @@ const {
                             }
                           `}
                         >
-                          <div className="flex gap-3">
+                          <div
+                            className="
+                              flex
+                              gap-3
+                            "
+                          >
 
                             {/* Status dot */}
 
@@ -623,9 +660,14 @@ const {
                               `}
                             />
 
-                            <div className="min-w-0 flex-1">
+                            <div
+                              className="
+                                min-w-0
+                                flex-1
+                              "
+                            >
 
-                              {/* Title + time */}
+                              {/* Title */}
 
                               <div
                                 className="
@@ -645,15 +687,17 @@ const {
                                   {notification.title}
                                 </p>
 
-                               <span
-                               className="
-                              shrink-0
-                              text-[10px]
-                                text-slate-600
+                                <span
+                                  className="
+                                    shrink-0
+                                    text-[10px]
+                                    text-slate-600
                                   "
                                 >
-                                Just now
-                              </span>
+                                  {formatNotificationTime(
+                                    notification.createdAt
+                                  )}
+                                </span>
                               </div>
 
                               {/* Message */}
@@ -679,6 +723,9 @@ const {
                                   gap-2
                                 "
                               >
+
+                                {/* Mark read */}
+
                                 {!notification.read && (
                                   <button
                                     type="button"
@@ -709,6 +756,8 @@ const {
                                     Mark read
                                   </button>
                                 )}
+
+                                {/* Remove */}
 
                                 <button
                                   type="button"
@@ -754,28 +803,28 @@ const {
                       p-3
                     "
                   >
-                   <button
-  type="button"
-  onClick={clearNotifications}
-  className="
-    flex
-    w-full
-    items-center
-    justify-center
-    gap-2
-    rounded-xl
-    py-2.5
-    text-xs
-    font-medium
-    text-slate-500
-    transition
-    hover:bg-white/[0.04]
-    hover:text-white
-  "
->
-  <Trash2 size={14} />
-  Clear all notifications
-</button>
+                    <button
+                      type="button"
+                      onClick={handleClearNotifications}
+                      className="
+                        flex
+                        w-full
+                        items-center
+                        justify-center
+                        gap-2
+                        rounded-xl
+                        py-2.5
+                        text-xs
+                        font-medium
+                        text-slate-500
+                        transition
+                        hover:bg-red-500/[0.06]
+                        hover:text-red-400
+                      "
+                    >
+                      <Trash2 size={14} />
+                      Clear all notifications
+                    </button>
                   </div>
                 )}
               </div>
@@ -890,4 +939,44 @@ const {
       </div>
     </header>
   );
+}
+
+/* =========================================================
+   NOTIFICATION TIME FORMATTER
+========================================================= */
+
+function formatNotificationTime(
+  timestamp: number
+): string {
+  const difference = Date.now() - timestamp;
+
+  if (difference < 60 * 1000) {
+    return "Just now";
+  }
+
+  const minutes = Math.floor(
+    difference / (60 * 1000)
+  );
+
+  if (minutes < 60) {
+    return `${minutes}m ago`;
+  }
+
+  const hours = Math.floor(
+    minutes / 60
+  );
+
+  if (hours < 24) {
+    return `${hours}h ago`;
+  }
+
+  const days = Math.floor(
+    hours / 24
+  );
+
+  if (days === 1) {
+    return "Yesterday";
+  }
+
+  return `${days}d ago`;
 }
