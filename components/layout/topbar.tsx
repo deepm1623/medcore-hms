@@ -27,16 +27,14 @@ export default function Topbar({
 
   const [showNotifications, setShowNotifications] =
     useState(false);
-
-  const {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    removeNotification,
-    clearAll,
-  } = useNotifications();
-
+const {
+  notifications,
+  unreadCount,
+  markAsRead,
+  markAllAsRead,
+  removeNotification,
+  clearNotifications,
+} = useNotifications();
   /* =========================================================
      GO TO DOCTOR DASHBOARD
   ========================================================= */
@@ -647,15 +645,15 @@ export default function Topbar({
                                   {notification.title}
                                 </p>
 
-                                <span
-                                  className="
-                                    shrink-0
-                                    text-[10px]
-                                    text-slate-600
+                               <span
+                               className="
+                              shrink-0
+                              text-[10px]
+                                text-slate-600
                                   "
                                 >
-                                  {notification.time}
-                                </span>
+                                Just now
+                              </span>
                               </div>
 
                               {/* Message */}
@@ -756,28 +754,28 @@ export default function Topbar({
                       p-3
                     "
                   >
-                    <button
-                      type="button"
-                      onClick={clearAll}
-                      className="
-                        flex
-                        w-full
-                        items-center
-                        justify-center
-                        gap-2
-                        rounded-xl
-                        py-2.5
-                        text-xs
-                        font-medium
-                        text-slate-500
-                        transition
-                        hover:bg-white/[0.04]
-                        hover:text-white
-                      "
-                    >
-                      <Trash2 size={14} />
-                      Clear all notifications
-                    </button>
+                   <button
+  type="button"
+  onClick={clearNotifications}
+  className="
+    flex
+    w-full
+    items-center
+    justify-center
+    gap-2
+    rounded-xl
+    py-2.5
+    text-xs
+    font-medium
+    text-slate-500
+    transition
+    hover:bg-white/[0.04]
+    hover:text-white
+  "
+>
+  <Trash2 size={14} />
+  Clear all notifications
+</button>
                   </div>
                 )}
               </div>
