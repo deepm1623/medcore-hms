@@ -478,12 +478,8 @@ export default function Topbar({
             {/* =================================================
                 NOTIFICATION PANEL
 
-                IMPORTANT:
                 Mobile = fixed to viewport
                 Desktop = absolute to notification button
-
-                This prevents the panel from going
-                outside the screen.
             ================================================== */}
 
             {showNotifications && (
@@ -675,7 +671,7 @@ export default function Topbar({
                           text-slate-600
                         "
                       >
-                        You're all caught up.
+                        You&apos;re all caught up.
                       </p>
                     </div>
                   ) : (
