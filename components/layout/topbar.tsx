@@ -12,7 +12,10 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useNotifications } from "@/lib/notifications";
+import {
+  formatNotificationTime,
+  useNotifications,
+} from "@/lib/notifications";
 
 interface TopbarProps {
   onMenuClick?: () => void;
@@ -63,27 +66,29 @@ export default function Topbar({
   };
 
   /* =========================================================
-     CLOSE NOTIFICATION PANEL WHEN CLICKING OUTSIDE
+     CLOSE NOTIFICATIONS WHEN CLICKING OUTSIDE
   ========================================================= */
 
   useEffect(() => {
+    if (!showNotifications) {
+      return;
+    }
+
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+
       if (
         notificationRef.current &&
-        !notificationRef.current.contains(
-          event.target as Node
-        )
+        !notificationRef.current.contains(target)
       ) {
         setShowNotifications(false);
       }
     };
 
-    if (showNotifications) {
-      document.addEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-    }
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
 
     return () => {
       document.removeEventListener(
@@ -94,12 +99,43 @@ export default function Topbar({
   }, [showNotifications]);
 
   /* =========================================================
-     DOCTOR PROFILE / SETTINGS
+     ESCAPE KEY
+  ========================================================= */
+
+  useEffect(() => {
+    if (!showNotifications) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleEscape
+    );
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        handleEscape
+      );
+    };
+  }, [showNotifications]);
+
+  /* =========================================================
+     DOCTOR PROFILE
   ========================================================= */
 
   const handleDoctorProfile = () => {
     setShowNotifications(false);
-    router.push("/dashboard/doctor/settings");
+
+    router.push(
+      "/dashboard/doctor/settings"
+    );
   };
 
   /* =========================================================
@@ -107,7 +143,9 @@ export default function Topbar({
   ========================================================= */
 
   const handleNotificationToggle = () => {
-    setShowNotifications((current) => !current);
+    setShowNotifications(
+      (current) => !current
+    );
   };
 
   /* =========================================================
@@ -119,7 +157,7 @@ export default function Topbar({
   };
 
   /* =========================================================
-     CLEAR ALL NOTIFICATIONS
+     CLEAR ALL
   ========================================================= */
 
   const handleClearNotifications = () => {
@@ -147,6 +185,7 @@ export default function Topbar({
           w-full
           items-center
           justify-between
+          gap-3
           px-4
           sm:px-6
           lg:px-8
@@ -154,19 +193,19 @@ export default function Topbar({
       >
 
         {/* =====================================================
-            MOBILE LEFT
+            MOBILE BRAND / MENU
         ====================================================== */}
 
         <div
           className="
             flex
             min-w-0
+            flex-1
             items-center
             gap-3
             lg:hidden
           "
         >
-
           {/* Mobile menu */}
 
           <button
@@ -191,7 +230,6 @@ export default function Topbar({
               hover:border-cyan-400/60
               hover:bg-slate-800
               hover:text-cyan-400
-              hover:shadow-[0_0_30px_rgba(6,182,212,0.30)]
               active:scale-95
             "
           >
@@ -201,7 +239,7 @@ export default function Topbar({
             />
           </button>
 
-          {/* Mobile MedCore brand */}
+          {/* Brand */}
 
           <button
             type="button"
@@ -212,8 +250,7 @@ export default function Topbar({
               cursor-pointer
               text-left
               outline-none
-              transition-all
-              duration-200
+              transition
               hover:opacity-80
               focus-visible:rounded-lg
               focus-visible:ring-2
@@ -247,20 +284,20 @@ export default function Topbar({
         </div>
 
         {/* =====================================================
-            DESKTOP LEFT
+            DESKTOP BRAND + SEARCH
         ====================================================== */}
 
         <div
           className="
             hidden
+            min-w-0
             flex-1
             items-center
             gap-6
             lg:flex
           "
         >
-
-          {/* Desktop MedCore brand */}
+          {/* Desktop brand */}
 
           <button
             type="button"
@@ -271,8 +308,7 @@ export default function Topbar({
               cursor-pointer
               text-left
               outline-none
-              transition-all
-              duration-200
+              transition
               hover:opacity-80
               focus-visible:rounded-lg
               focus-visible:ring-2
@@ -302,13 +338,14 @@ export default function Topbar({
             </p>
           </button>
 
-          {/* Desktop Search */}
+          {/* Search */}
 
           <div
             className="
               flex
+              min-w-0
               flex-1
-              max-w-xl
+              max-w-2xl
             "
           >
             <div
@@ -367,8 +404,8 @@ export default function Topbar({
             flex
             shrink-0
             items-center
-            gap-2
-            sm:gap-4
+            gap-1
+            sm:gap-3
           "
         >
 
@@ -380,13 +417,13 @@ export default function Topbar({
             ref={notificationRef}
             className="relative"
           >
-
             {/* Notification button */}
 
             <button
               type="button"
               aria-label="Notifications"
               aria-expanded={showNotifications}
+              aria-haspopup="dialog"
               onClick={handleNotificationToggle}
               className="
                 relative
@@ -410,14 +447,12 @@ export default function Topbar({
                 strokeWidth={1.8}
               />
 
-              {/* Unread count */}
-
               {unreadCount > 0 && (
                 <span
                   className="
                     absolute
-                    right-[4px]
-                    top-[3px]
+                    right-[3px]
+                    top-[2px]
                     flex
                     h-4
                     min-w-4
@@ -441,43 +476,66 @@ export default function Topbar({
             </button>
 
             {/* =================================================
-                NOTIFICATION DROPDOWN
+                NOTIFICATION PANEL
+
+                IMPORTANT:
+                Mobile = fixed to viewport
+                Desktop = absolute to notification button
+
+                This prevents the panel from going
+                outside the screen.
             ================================================== */}
 
             {showNotifications && (
               <div
+                role="dialog"
+                aria-label="Notifications"
                 className="
-                  absolute
-                  right-0
-                  top-[56px]
+                  fixed
+                  left-3
+                  right-3
+                  top-[84px]
                   z-[100]
-                  w-[calc(100vw-32px)]
-                  max-w-[390px]
+                  flex
+                  max-h-[calc(100vh-100px)]
+                  flex-col
                   overflow-hidden
                   rounded-2xl
                   border
                   border-white/[0.10]
                   bg-slate-950
                   shadow-2xl
-                  shadow-black/60
+                  shadow-black/70
+                  backdrop-blur-xl
+
+                  sm:absolute
+                  sm:left-auto
+                  sm:right-0
+                  sm:top-[56px]
                   sm:w-[390px]
+                  sm:max-h-[calc(100vh-90px)]
                 "
               >
 
-                {/* Header */}
+                {/* =================================================
+                    HEADER
+                ================================================== */}
 
                 <div
                   className="
                     flex
-                    items-center
+                    shrink-0
+                    items-start
                     justify-between
+                    gap-3
                     border-b
                     border-white/[0.08]
-                    px-5
+                    px-4
                     py-4
+                    sm:px-5
                   "
                 >
-                  <div>
+                  <div className="min-w-0">
                     <h3
                       className="
                         text-sm
@@ -501,20 +559,18 @@ export default function Topbar({
                               ? "notification"
                               : "notifications"
                           }`
-                        : "You&apos;re all caught up"}
+                        : "You're all caught up"}
                     </p>
                   </div>
 
                   <div
                     className="
                       flex
+                      shrink-0
                       items-center
                       gap-1
                     "
                   >
-
-                    {/* Mark all read */}
-
                     {unreadCount > 0 && (
                       <button
                         type="button"
@@ -529,13 +585,12 @@ export default function Topbar({
                           transition
                           hover:bg-cyan-400/10
                           hover:text-cyan-300
+                          active:scale-95
                         "
                       >
                         Mark all read
                       </button>
                     )}
-
-                    {/* Close */}
 
                     <button
                       type="button"
@@ -547,6 +602,7 @@ export default function Topbar({
                         flex
                         h-8
                         w-8
+                        shrink-0
                         items-center
                         justify-center
                         rounded-lg
@@ -554,22 +610,27 @@ export default function Topbar({
                         transition
                         hover:bg-white/[0.05]
                         hover:text-white
+                        active:scale-95
                       "
                     >
-                      <X size={16} />
+                      <X size={17} />
                     </button>
                   </div>
                 </div>
 
-                {/* Notification list */}
+                {/* =================================================
+                    NOTIFICATION LIST
+                ================================================== */}
 
                 <div
                   className="
-                    max-h-[420px]
+                    min-h-0
+                    flex-1
+                    overflow-x-hidden
                     overflow-y-auto
+                    overscroll-contain
                   "
                 >
-
                   {notifications.length === 0 ? (
                     <div
                       className="
@@ -614,7 +675,7 @@ export default function Topbar({
                           text-slate-600
                         "
                       >
-                        You&apos;re all caught up.
+                        You're all caught up.
                       </p>
                     </div>
                   ) : (
@@ -625,10 +686,11 @@ export default function Topbar({
                           className={`
                             border-b
                             border-white/[0.06]
-                            px-5
+                            px-4
                             py-4
                             transition
                             hover:bg-white/[0.025]
+                            sm:px-5
                             ${
                               !notification.read
                                 ? "bg-cyan-400/[0.025]"
@@ -639,11 +701,11 @@ export default function Topbar({
                           <div
                             className="
                               flex
+                              min-w-0
                               gap-3
                             "
                           >
-
-                            {/* Status dot */}
+                            {/* Status */}
 
                             <div
                               className={`
@@ -660,31 +722,41 @@ export default function Topbar({
                               `}
                             />
 
+                            {/* Content */}
+
                             <div
                               className="
                                 min-w-0
                                 flex-1
                               "
                             >
-
-                              {/* Title */}
+                              {/* Title + time */}
 
                               <div
                                 className="
                                   flex
-                                  items-start
-                                  justify-between
-                                  gap-3
+                                  min-w-0
+                                  flex-col
+                                  gap-1
+                                  sm:flex-row
+                                  sm:items-start
+                                  sm:justify-between
+                                  sm:gap-3
                                 "
                               >
                                 <p
                                   className="
+                                    min-w-0
+                                    break-words
                                     text-sm
                                     font-semibold
+                                    leading-5
                                     text-white
                                   "
                                 >
-                                  {notification.title}
+                                  {
+                                    notification.title
+                                  }
                                 </p>
 
                                 <span
@@ -705,12 +777,15 @@ export default function Topbar({
                               <p
                                 className="
                                   mt-1
+                                  break-words
                                   text-xs
                                   leading-5
                                   text-slate-400
                                 "
                               >
-                                {notification.message}
+                                {
+                                  notification.message
+                                }
                               </p>
 
                               {/* Actions */}
@@ -719,13 +794,11 @@ export default function Topbar({
                                 className="
                                   mt-3
                                   flex
+                                  flex-wrap
                                   items-center
                                   gap-2
                                 "
                               >
-
-                                {/* Mark read */}
-
                                 {!notification.read && (
                                   <button
                                     type="button"
@@ -737,12 +810,12 @@ export default function Topbar({
                                     className="
                                       inline-flex
                                       items-center
-                                      gap-1
+                                      gap-1.5
                                       rounded-lg
                                       border
                                       border-white/[0.08]
-                                      px-2
-                                      py-1
+                                      px-2.5
+                                      py-1.5
                                       text-[10px]
                                       font-medium
                                       text-slate-400
@@ -750,14 +823,16 @@ export default function Topbar({
                                       hover:border-cyan-400/20
                                       hover:bg-cyan-400/5
                                       hover:text-cyan-400
+                                      active:scale-95
                                     "
                                   >
-                                    <Check size={12} />
+                                    <Check
+                                      size={12}
+                                    />
+
                                     Mark read
                                   </button>
                                 )}
-
-                                {/* Remove */}
 
                                 <button
                                   type="button"
@@ -769,19 +844,23 @@ export default function Topbar({
                                   className="
                                     inline-flex
                                     items-center
-                                    gap-1
+                                    gap-1.5
                                     rounded-lg
-                                    px-2
-                                    py-1
+                                    px-2.5
+                                    py-1.5
                                     text-[10px]
                                     font-medium
                                     text-slate-500
                                     transition
                                     hover:bg-red-500/10
                                     hover:text-red-400
+                                    active:scale-95
                                   "
                                 >
-                                  <Trash2 size={12} />
+                                  <Trash2
+                                    size={12}
+                                  />
+
                                   Remove
                                 </button>
                               </div>
@@ -793,11 +872,14 @@ export default function Topbar({
                   )}
                 </div>
 
-                {/* Footer */}
+                {/* =================================================
+                    FOOTER
+                ================================================== */}
 
                 {notifications.length > 0 && (
                   <div
                     className="
+                      shrink-0
                       border-t
                       border-white/[0.08]
                       p-3
@@ -820,9 +902,11 @@ export default function Topbar({
                         transition
                         hover:bg-red-500/[0.06]
                         hover:text-red-400
+                        active:scale-[0.99]
                       "
                     >
                       <Trash2 size={14} />
+
                       Clear all notifications
                     </button>
                   </div>
@@ -867,7 +951,6 @@ export default function Topbar({
               active:scale-[0.98]
             "
           >
-
             {/* Avatar */}
 
             <div
@@ -939,44 +1022,4 @@ export default function Topbar({
       </div>
     </header>
   );
-}
-
-/* =========================================================
-   NOTIFICATION TIME FORMATTER
-========================================================= */
-
-function formatNotificationTime(
-  timestamp: number
-): string {
-  const difference = Date.now() - timestamp;
-
-  if (difference < 60 * 1000) {
-    return "Just now";
-  }
-
-  const minutes = Math.floor(
-    difference / (60 * 1000)
-  );
-
-  if (minutes < 60) {
-    return `${minutes}m ago`;
-  }
-
-  const hours = Math.floor(
-    minutes / 60
-  );
-
-  if (hours < 24) {
-    return `${hours}h ago`;
-  }
-
-  const days = Math.floor(
-    hours / 24
-  );
-
-  if (days === 1) {
-    return "Yesterday";
-  }
-
-  return `${days}d ago`;
 }
