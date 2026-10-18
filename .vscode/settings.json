@@ -1,0 +1,6 @@
+{
+    "liveServer.settings.port": 5504,
+    "postman.settings.dotenv-detection-notification-visibility": false,
+    "css.lint.unknownAtRules": "ignore"
+}
+
