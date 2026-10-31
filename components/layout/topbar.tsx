@@ -243,7 +243,7 @@ export default function Topbar({
                         No notifications
                       </p>
                       <p className="mt-1 text-xs text-slate-600">
-                        You're all caught up.
+                        You &apos;re all caught up.
                       </p>
                     </div>
                   ) : (
